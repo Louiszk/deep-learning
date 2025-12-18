@@ -1,0 +1,6 @@
+__pycache__
+datasets
+homework_data
+deepvenv
+splits
+*.pdf
