@@ -1,9 +1,7 @@
-from settings import project_root, datasets_root
+from settings import project_root, datasets_root, seed
 from sklearn.model_selection import train_test_split
 import json
 import os
-
-seed = 3705548
 
 def get_filenames(dataset_path: str):
     filenames_per_class = {}
