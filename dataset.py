@@ -1,15 +1,17 @@
-from settings import project_root, datasets_root
+from settings import datasets_root
 from splits import create_splits
+from transforms import get_transforms
 from torch.utils.data import Dataset
 from typing import Tuple
 from PIL import Image
+import torch
 import os
 
 class EuroSAT(Dataset):
-    def __init__(self, dataset_type: str, split: str, split_size: tuple =(250, 100, 200), transform=None):
+    def __init__(self, dataset_type: str, split: str, split_size: tuple =(250, 100, 200), transform_type: str ="val"):
         self.dataset_type = dataset_type
         self.split = split
-        self.transform = transform
+        self.transform = get_transforms(transform_type)
         self.dataset_path = os.path.join(datasets_root, dataset_type)
         
         self.dataset_splits = create_splits(dataset_type, split_size)

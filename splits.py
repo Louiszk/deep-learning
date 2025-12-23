@@ -73,7 +73,3 @@ def create_splits(dataset_type: str, split_size: tuple):
     
     print(f"Split complete.")
     return dataset_splits
-
-
-if __name__ == "__main__":
-    create_splits("EuroSAT_RGB", (400, 200, 400))

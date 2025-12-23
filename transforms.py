@@ -1,6 +1,5 @@
 from torchvision.models import ResNet18_Weights
 from torchvision import transforms
-import torch
 
 def get_transforms(mode="weak"):
     weights = ResNet18_Weights.DEFAULT
@@ -26,5 +25,8 @@ def get_transforms(mode="weak"):
         
     elif mode == "val":
         aug_layers = transforms.Compose([])
+    else:
+        print("No transform applied.")
+        return None
 
     return transforms.Compose([aug_layers, base_transform])

@@ -1,5 +1,4 @@
 from dataset import EuroSAT
-from transforms import get_transforms
 from settings import project_root, seed
 from torchvision.models import resnet18, ResNet18_Weights
 from torch.utils.data import DataLoader
@@ -91,12 +90,9 @@ def main():
     g.manual_seed(seed)
     
     print(f"Starting training.")
-
-    train_transform = get_transforms(mode=CONFIG["augmentation_mode"])
-    val_transform = get_transforms(mode="val")
     
-    train_dataset = EuroSAT("EuroSAT_RGB", "train", transform=train_transform)
-    val_dataset = EuroSAT("EuroSAT_RGB", "val", transform=val_transform)
+    train_dataset = EuroSAT("EuroSAT_RGB", split="train", transform=CONFIG["augmentation_mode"])
+    val_dataset = EuroSAT("EuroSAT_RGB", split="val", transform="val")
     class_names = train_dataset.classes
     num_classes = len(class_names)
     
