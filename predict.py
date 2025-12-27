@@ -86,8 +86,10 @@ def find_top_bottom_images(logits, labels, paths, classes: list, selected_classe
 
         masked_paths = [path for path, keep in zip(paths, mask.tolist()) if keep]
 
-        top_bottom_images[class_name]["top"] = [masked_paths[idx] for idx in top_indices]
-        top_bottom_images[class_name]["bottom"] = [masked_paths[idx] for idx in bottom_indices]
+        top_bottom_images[class_name] = {
+            "top": [masked_paths[idx] for idx in top_indices],
+            "bottom": [masked_paths[idx] for idx in bottom_indices]
+        } 
 
     return top_bottom_images
 
