@@ -102,7 +102,7 @@ def main():
     model_path = os.path.join(models_dir, model_name)
     logits_path = os.path.join(output_dir, "logits.pt")
 
-    test_dataset = EuroSAT("EuroSAT_RGB", split="test", transform="val")
+    test_dataset = EuroSAT("EuroSAT_RGB", split="test", transform_type="val")
     test_loader = DataLoader(test_dataset, batch_size=CONFIG["batch_size"], shuffle=False, num_workers=CONFIG["num_workers"])
     
     all_classes = test_dataset.classes

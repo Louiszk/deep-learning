@@ -91,8 +91,8 @@ def main():
     
     print(f"Starting training.")
     
-    train_dataset = EuroSAT("EuroSAT_RGB", split="train", transform=CONFIG["augmentation_mode"])
-    val_dataset = EuroSAT("EuroSAT_RGB", split="val", transform="val")
+    train_dataset = EuroSAT("EuroSAT_RGB", split="train", transform_type=CONFIG["augmentation_mode"])
+    val_dataset = EuroSAT("EuroSAT_RGB", split="val", transform_type="val")
     class_names = train_dataset.classes
     num_classes = len(class_names)
     
