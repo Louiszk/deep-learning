@@ -1,0 +1,50 @@
+from settings import project_root
+import matplotlib.pyplot as plt
+import json
+import os
+
+
+def plot_training_results(aug_mode):
+    results_path = os.path.join(project_root, "models", f"training_results_{aug_mode}.json")
+    if not os.path.exists(results_path):
+        print("File not found.")
+        return
+
+    with open(results_path, "r") as f:
+        data = json.load(f)
+
+    val_accuracy: list = data["val_accuracy"]
+    class_tprs = data["class_tpr"]
+
+    epochs = list(range(1, len(val_accuracy) + 1))
+
+    best_val = max(val_accuracy)
+    best_epoch = val_accuracy.index(best_val) + 1
+
+    print(f"Augmentation Mode: {aug_mode}\nBest validation accuracy: {best_val} (Epoch {best_epoch})")
+
+    fig, ax = plt.subplots(figsize=(12, 8))
+
+    for class_name, tpr_values in class_tprs.items():
+        ax.plot(
+            epochs,
+            tpr_values,
+            label=class_name,
+            linewidth=1.5,
+        )
+
+    ax.set_xlabel("Epoch")
+    ax.set_ylabel("True Positive Rate")
+    ax.set_ylim(0, 1.05)
+    ax.set_title(f"Class TPR ({aug_mode} augmentation)")
+    ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+    ax.grid(True)
+
+    fig.tight_layout()
+
+    plot_path = results_path.replace(".json", "_class_tpr.png")
+    fig.savefig(plot_path)
+
+if __name__ == "__main__":
+    for aug_mode in ["weak", "strong"]:
+        plot_training_results(aug_mode)
