@@ -126,6 +126,10 @@ def main():
             
     else:
         torch.save(logits, logits_path)
+
+        with open(os.path.join(output_dir, "test_filenames.json"), "w") as f:
+            json.dump(paths, f, indent=4)
+        
         selected_classes = ["River", "Forest", "SeaLake"]
         top_bottom_images = find_top_bottom_images(logits, labels, paths, all_classes, selected_classes)
 
