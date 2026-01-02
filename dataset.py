@@ -1,6 +1,6 @@
-from settings import datasets_root
 from splits import create_splits
 from transforms import get_transforms
+from settings import datasets_root, split_size
 from torch.utils.data import Dataset
 from skimage.io import imread
 from typing import Tuple
@@ -10,7 +10,7 @@ import torch
 import os
 
 class EuroSAT(Dataset):
-    def __init__(self, dataset_type: str, split: str, split_size: tuple =(250, 100, 200), transform_type: str ="val"):
+    def __init__(self, dataset_type: str, split: str, transform_type: str ="val"):
         self.dataset_type = dataset_type
         self.split = split
         self.is_ms = "MS" in dataset_type
