@@ -1,5 +1,6 @@
 from dataset import EuroSAT
-from settings import project_root, seed
+from ms_model import LateFusionModel
+from settings import project_root, seed, dataset_type
 from torchvision.models import resnet18, ResNet18_Weights
 from torch.utils.data import DataLoader
 import torch.optim as optim
@@ -37,7 +38,7 @@ def seed_worker(worker_id):
     np.random.seed(worker_seed)
     random.seed(worker_seed)
 
-def get_model(num_classes):
+def get_rgb_model(num_classes):
     weights = ResNet18_Weights.DEFAULT
     model = resnet18(weights=weights)
 
@@ -90,9 +91,23 @@ def main():
     g.manual_seed(seed)
     
     print(f"Starting training.")
+
+    if dataset_type == "RGB":
+        dataset_name = "EuroSAT_RGB"
+        aug_mode = CONFIG["augmentation_mode"]
+        model_prefix = f"best_model_rgb_{aug_mode}"
+        results_prefix = f"training_results_rgb_{aug_mode}"
+    elif dataset_type == "MS":
+        dataset_name = "EuroSAT_MS"
+        aug_mode = "weak"  # no colorjitter for MS data
+        model_prefix = "best_model_ms"
+        results_prefix = "training_results_ms"
+    else:
+        raise ValueError("Invalid dataset_type.")
+
+    train_dataset = EuroSAT(dataset_name, split="train", transform_type=aug_mode)
+    val_dataset = EuroSAT(dataset_name, split="val", transform_type="val")
     
-    train_dataset = EuroSAT("EuroSAT_RGB", split="train", transform_type=CONFIG["augmentation_mode"])
-    val_dataset = EuroSAT("EuroSAT_RGB", split="val", transform_type="val")
     class_names = train_dataset.classes
     num_classes = len(class_names)
     
@@ -113,12 +128,17 @@ def main():
         num_workers=CONFIG["num_workers"]
     )
     
-    model = get_model(num_classes)
+    if dataset_type == "RGB":
+        model = get_rgb_model(num_classes)
+    else:
+        model = LateFusionModel(num_classes=num_classes).to(device)
+    
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=CONFIG["learning_rate"], momentum=CONFIG["momentum"])
     
     training_results = {
         "config": CONFIG,
+        "dataset_type": dataset_type,
         "val_accuracy": [],
         "class_tpr": {class_name: [] for class_name in class_names}
     }
@@ -131,15 +151,13 @@ def main():
         
         if val_accuracy > best_accuracy:
             best_accuracy = val_accuracy
-            save_name = f"best_model_{CONFIG['augmentation_mode']}.pth"
-            torch.save(model.state_dict(), os.path.join(output_dir, save_name))
+            torch.save(model.state_dict(), os.path.join(output_dir, f"{model_prefix}.pth"))
         
         training_results["val_accuracy"].append(val_accuracy)
         for i, name in enumerate(class_names):
             training_results["class_tpr"][name].append(class_tpr[i])
 
-    log_filename = f"training_results_{CONFIG['augmentation_mode']}.json"
-    with open(os.path.join(output_dir, log_filename), "w") as f:
+    with open(os.path.join(output_dir, f"{results_prefix}.json"), "w") as f:
         json.dump(training_results, f)
 
     print("\nTraining complete.\nResults saved to /models.")

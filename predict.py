@@ -1,5 +1,6 @@
 from dataset import EuroSAT
-from settings import project_root, seed
+from ms_model import LateFusionModel
+from settings import project_root, seed, dataset_type
 from torchvision.models import resnet18, ResNet18_Weights
 from torch.utils.data import DataLoader
 import torch.nn as nn
@@ -16,7 +17,7 @@ check_reproducability = False
 CONFIG = {
     "batch_size": 50,
     "num_workers": 4,
-    "augmentation_mode": "weak"
+    "augmentation_mode": "strong"
 }
 
 def set_seed():
@@ -28,12 +29,16 @@ def set_seed():
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-
 def get_model(path, num_classes):
-    weights = ResNet18_Weights.DEFAULT
-    model = resnet18(weights=weights)
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, num_classes)
+    if dataset_type == "RGB":
+        weights = ResNet18_Weights.DEFAULT
+        model = resnet18(weights=weights)
+        num_ftrs = model.fc.in_features
+        model.fc = nn.Linear(num_ftrs, num_classes)
+    elif dataset_type == "MS":
+        model = LateFusionModel(num_classes=num_classes)
+    else:
+        raise ValueError("Invalid dataset_type.")
     
     model.load_state_dict(torch.load(path, map_location=device))
     model.to(device)
@@ -100,11 +105,23 @@ def main():
     output_dir = os.path.join(project_root, "predictions")
     os.makedirs(output_dir, exist_ok=True)
     
-    model_name = f"best_model_{CONFIG['augmentation_mode']}.pth"
-    model_path = os.path.join(models_dir, model_name)
-    logits_path = os.path.join(output_dir, "logits.pt")
+    if dataset_type == "RGB":
+        model_name = f"best_model_rgb_{CONFIG['augmentation_mode']}.pth"
+        dataset_name = "EuroSAT_RGB"
+        logit_filename = "logits_rgb.pt"
+    else:
+        model_name = "best_model_ms.pth"
+        dataset_name = "EuroSAT_MS"
+        logit_filename = "logits_ms.pt"
 
-    test_dataset = EuroSAT("EuroSAT_RGB", split="test", transform_type="val")
+    model_path = os.path.join(models_dir, model_name)
+    logits_path = os.path.join(output_dir, logit_filename)
+
+    if not os.path.exists(model_path):
+        print(f"Model not found.")
+        return
+
+    test_dataset = EuroSAT(dataset_name, split="test", transform_type="val")
     test_loader = DataLoader(test_dataset, batch_size=CONFIG["batch_size"], shuffle=False, num_workers=CONFIG["num_workers"])
     
     all_classes = test_dataset.classes
@@ -126,20 +143,23 @@ def main():
             
     else:
         torch.save(logits, logits_path)
-
-        with open(os.path.join(output_dir, "test_filenames.json"), "w") as f:
-            json.dump(paths, f, indent=4)
         
+        filename_log = f"test_filenames_{dataset_type.lower()}.json"
+        with open(os.path.join(output_dir, filename_log), "w") as f:
+            json.dump(paths, f, indent=4)
+            
         selected_classes = ["River", "Forest", "SeaLake"]
         top_bottom_images = find_top_bottom_images(logits, labels, paths, all_classes, selected_classes)
 
         class_tpr = get_class_tpr(logits, labels, num_classes)
         class_tpr_readable = {all_classes[i]: class_tpr[i] for i in range(len(class_tpr))}
         
-        with open(os.path.join(output_dir, "test_class_tpr.json"), "w") as f:
+        tpr_filename = f"test_class_tpr_{dataset_type.lower()}.json"
+        with open(os.path.join(output_dir, tpr_filename), "w") as f:
             json.dump(class_tpr_readable, f, indent=4)
 
-        with open(os.path.join(output_dir, "image_paths.json"), "w") as f:
+        img_paths_filename = f"image_paths_{dataset_type.lower()}.json"
+        with open(os.path.join(output_dir, img_paths_filename), "w") as f:
             json.dump(top_bottom_images, f, indent=4)
             
         print("Results saved to /predictions.")
