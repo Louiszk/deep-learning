@@ -1,5 +1,6 @@
 from settings import project_root
 import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 import json
 import os
 
@@ -36,6 +37,8 @@ def plot_training_results(training_type):
     ax.set_ylabel("True Positive Rate")
     ax.set_ylim(0, 1.05)
     ax.set_title(f"Class TPR ({training_type})")
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    
     ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
     ax.grid(True)
 
