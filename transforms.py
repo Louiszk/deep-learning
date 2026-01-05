@@ -19,7 +19,6 @@ def get_transforms(mode="weak", is_ms=False):
             raise ValueError("Strong augmentation is disabled for MS data.")
         
         aug_layers = transforms.Compose([
-            transforms.RandomResizedCrop(size=64, scale=(0.75, 1.0), ratio=(0.9, 1.1)),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.RandomVerticalFlip(p=0.5),
             transforms.ColorJitter(
