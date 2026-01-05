@@ -9,7 +9,7 @@ def get_filenames(dataset_path: str):
     
     for class_name in class_names:
         class_path = os.path.join(dataset_path, class_name)
-        class_file_paths = os.listdir(class_path)
+        class_file_paths = sorted(os.listdir(class_path))
         image_ext = [".jpg", ".tif"]
         filenames_per_class[class_name] = [
             os.path.join(class_name, cfp) for cfp in class_file_paths if os.path.splitext(cfp)[1] in image_ext

@@ -136,10 +136,13 @@ def main():
             print("No saved logits found.")
             return
         saved_logits = torch.load(logits_path)
+
         if torch.allclose(logits, saved_logits, atol=1e-5):
             print("Logits match!")
         else:
             print("Logits do not match!")
+            diff = float((logits - saved_logits).abs().max())
+            print(f"Max difference: {diff:.8f}")
             
     else:
         torch.save(logits, logits_path)

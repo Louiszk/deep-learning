@@ -37,7 +37,7 @@ def visualize_images():
         for col_idx, img_path in enumerate(image_paths):
             ax = axes[row_idx][col_idx]
 
-            full_path = os.path.join(datasets_root, img_path)
+            full_path = os.path.join(datasets_root, "EuroSAT_RGB", img_path)
             img = Image.open(full_path)
 
             ax.imshow(img)
