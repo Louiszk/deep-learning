@@ -16,7 +16,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 CONFIG = {
     "num_workers": 4,
     "batch_size": 50,
-    "epochs": 20,
+    "epochs": 24,
     "learning_rate": 0.001,
     "momentum": 0.9,
     "augmentation_mode": "weak"
