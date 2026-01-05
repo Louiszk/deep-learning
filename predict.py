@@ -12,7 +12,7 @@ import os
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-check_reproducability = False 
+check_reproducibility = False 
 
 CONFIG = {
     "batch_size": 50,
@@ -131,7 +131,7 @@ def main():
     print("Running Tests...")
     logits, labels, paths = get_test_predictions(model, test_loader)
     
-    if check_reproducability:
+    if check_reproducibility:
         if not os.path.exists(logits_path):
             print("No saved logits found.")
             return

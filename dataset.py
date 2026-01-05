@@ -27,9 +27,7 @@ class EuroSAT(Dataset):
         
         for class_name, file_paths in self.filenames_per_class.items():
             label = self.classes.index(class_name)
-            for rel_path in file_paths:
-                full_path = os.path.join(self.dataset_path, rel_path)
-                self.samples.append((full_path, label))
+            self.samples.extend([file_path, label] for file_path in file_paths)
 
         if self.is_ms:
             self.ms_mean, self.ms_std = get_ms_statistics(self.dataset_splits)
@@ -42,14 +40,15 @@ class EuroSAT(Dataset):
         return len(self.samples)
 
     def __getitem__(self, idx) -> Tuple[torch.Tensor, int]:
-        path, label = self.samples[idx]
+        rel_path, label = self.samples[idx]
+        full_path = os.path.join(self.dataset_path, rel_path)
 
         if not self.is_ms:
-            img = Image.open(path).convert("RGB")
+            img = Image.open(full_path).convert("RGB")
             if self.transform:
                 img = self.transform(img)
         else:
-            img = imread(path)
+            img = imread(full_path)
             img = img.astype(np.float32) / 65535.0
             img = img[:, :, self.selected_bands]
 
