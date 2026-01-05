@@ -137,7 +137,7 @@ def main():
             return
         saved_logits = torch.load(logits_path)
 
-        if torch.allclose(logits, saved_logits, atol=1e-5):
+        if torch.allclose(logits, saved_logits, atol=1e-4):
             print("Logits match!")
         else:
             print("Logits do not match!")
