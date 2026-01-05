@@ -1,4 +1,4 @@
-from settings import project_root
+from settings import project_root, datasets_root
 import matplotlib.pyplot as plt
 from PIL import Image
 import json
@@ -6,7 +6,7 @@ import os
 
 
 def visualize_images():
-    json_path = os.path.join(project_root, "predictions", "image_paths.json")
+    json_path = os.path.join(project_root, "predictions", "image_paths_rgb.json")
     if not os.path.exists(json_path):
         print(f"File not found.")
         return
@@ -37,7 +37,7 @@ def visualize_images():
         for col_idx, img_path in enumerate(image_paths):
             ax = axes[row_idx][col_idx]
 
-            full_path = os.path.join(project_root, img_path)
+            full_path = os.path.join(datasets_root, img_path)
             img = Image.open(full_path)
 
             ax.imshow(img)
